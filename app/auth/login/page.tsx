@@ -41,7 +41,7 @@ export default function LoginPage() {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full mx-4"
       >
-          <div className="text-center mb-8">
+        <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
             <p className="text-gray-600">Sign in to your account</p>
           </div>
@@ -135,17 +135,16 @@ export default function LoginPage() {
             </motion.button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/auth/register"
-                className="text-blue-600 hover:text-blue-700 font-semibold"
-              >
-                Sign up
-              </Link>
-            </p>
-          </div>
+        <div className="mt-6 text-center">
+          <p className="text-gray-600">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/auth/register"
+              className="text-blue-600 hover:text-blue-700 font-semibold"
+            >
+              Sign up
+            </Link>
+          </p>
         </div>
       </motion.div>
     </div>
