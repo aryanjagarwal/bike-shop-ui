@@ -28,7 +28,7 @@ export default function LoginPage() {
       } else {
         setError("Invalid email or password");
       }
-    } catch (err) {
+    } catch {
       setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -139,7 +139,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center">
             <p className="text-gray-600">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link
                 href="/auth/register"
                 className="text-blue-600 hover:text-blue-700 font-semibold"

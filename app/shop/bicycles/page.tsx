@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Filter, SlidersHorizontal, X } from "lucide-react";
 import { products, categories, brands } from "@/lib/data";
 import ProductCard from "@/components/ProductCard";
 import { useSearchParams } from "next/navigation";
 
-export default function BicyclesShopPage() {
+function BicyclesShopContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") || "";
   
@@ -254,5 +254,22 @@ export default function BicyclesShopPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BicyclesShopPage() {
+  return (
+    <Suspense fallback={
+      <div className="pt-20 pb-12 bg-gray-50 min-h-screen">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-8">
+            <h1 className="text-4xl font-bold mb-2">Shop Bicycles</h1>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <BicyclesShopContent />
+    </Suspense>
   );
 }

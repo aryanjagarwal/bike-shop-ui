@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Heart } from "lucide-react";
 import Link from "next/link";
-import { useWishlistStore, useCartStore } from "@/lib/store";
+import { useWishlistStore } from "@/lib/store";
 import { products } from "@/lib/data";
 import ProductCard from "@/components/ProductCard";
 

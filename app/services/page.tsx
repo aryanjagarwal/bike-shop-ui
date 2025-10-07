@@ -126,7 +126,7 @@ export default function ServicesPage() {
           >
             <h2 className="text-4xl font-bold mb-4">Why Choose BikeShop?</h2>
             <p className="text-gray-600 text-lg">
-              We're committed to providing the best service in the industry
+              We&apos;re committed to providing the best service in the industry
             </p>
           </motion.div>
 

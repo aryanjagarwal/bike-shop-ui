@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import {
   Package,
   ShoppingCart,
-  Users,
   DollarSign,
   TrendingUp,
   AlertTriangle,

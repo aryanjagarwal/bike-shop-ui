@@ -59,7 +59,7 @@ export default function OrdersPage() {
             <Package className="w-24 h-24 mx-auto mb-6 text-gray-300" />
             <h2 className="text-2xl font-bold mb-4">No Orders Yet</h2>
             <p className="text-gray-600 mb-8">
-              You haven't placed any orders yet.
+              You haven&apos;t placed any orders yet.
             </p>
             <button
               onClick={() => router.push("/shop/bicycles")}

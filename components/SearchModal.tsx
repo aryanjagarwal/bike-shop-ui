@@ -81,7 +81,7 @@ export default function SearchModal() {
             <div className="max-h-96 overflow-y-auto p-4">
               {query.trim() && results.length === 0 ? (
                 <p className="text-center text-gray-500 py-8">
-                  No products found for "{query}"
+                  No products found for &quot;{query}&quot;
                 </p>
               ) : results.length > 0 ? (
                 <div className="space-y-2">
