@@ -57,7 +57,7 @@ export default function ServicesPage() {
   ];
 
   return (
-    <div className="pt-20 pb-12 bg-gray-50 min-h-screen">
+    <div className="pt-24 pb-12 bg-gray-50 min-h-screen">
       {/* Hero */}
       <section className="relative h-96 overflow-hidden">
         <Image

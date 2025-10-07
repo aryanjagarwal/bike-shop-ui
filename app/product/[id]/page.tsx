@@ -70,7 +70,7 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <div className="pt-20 pb-12 bg-gray-50 min-h-screen">
+    <div className="pt-24 pb-12 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Product Section */}
         <div className="bg-white rounded-lg shadow-sm p-6 md:p-8 mb-8">

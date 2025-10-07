@@ -17,7 +17,8 @@
   --radius: 0.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
+/* Dark mode disabled - keeping light theme always */
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
@@ -27,12 +28,20 @@
     --muted-foreground: #9ca3af;
     --border: #374151;
   }
-}
+} */
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Prevent zoom on Windows/Chrome */
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -41,10 +50,9 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-html {
-  scroll-behavior: smooth;
+  /* Ensure consistent rendering across platforms */
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 @layer utilities {

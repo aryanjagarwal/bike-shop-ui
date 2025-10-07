@@ -19,6 +19,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "BikeShop - Premium Bicycles & Parts",
   description: "Your one-stop destination for premium bicycles and parts. Quality products, expert service, and passionate support for cycling enthusiasts.",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
 };
 
 export default function RootLayout({

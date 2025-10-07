@@ -15,7 +15,7 @@ export default function WishlistPage() {
 
   if (wishlistProducts.length === 0) {
     return (
-      <div className="min-h-screen pt-20 pb-12 bg-gray-50">
+      <div className="min-h-screen pt-24 pb-12 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
             <Heart className="w-24 h-24 mx-auto mb-6 text-gray-300" />

@@ -30,19 +30,17 @@ export default function LoginPage() {
       }
     } catch {
       setError("An error occurred. Please try again.");
-    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen pt-20 pb-12 flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen pt-24 pb-12 flex items-center justify-center">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full mx-4"
       >
-        <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
             <p className="text-gray-600">Sign in to your account</p>
