@@ -51,12 +51,13 @@ export default function SearchModal() {
           />
 
           {/* Search Modal */}
-          <motion.div
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 w-full max-w-2xl bg-white rounded-lg shadow-2xl z-50 mx-4"
-          >
+          <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 pt-20">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: -20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -20 }}
+              className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl"
+            >
             {/* Search Input */}
             <div className="p-4 border-b flex items-center gap-3">
               <Search className="w-5 h-5 text-gray-400" />
@@ -124,7 +125,8 @@ export default function SearchModal() {
                 </div>
               )}
             </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
