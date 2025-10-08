@@ -17,19 +17,6 @@
   --radius: 0.5rem;
 }
 
-/* Dark mode disabled - keeping light theme always */
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --secondary: #1f2937;
-    --secondary-foreground: #ededed;
-    --muted: #111827;
-    --muted-foreground: #9ca3af;
-    --border: #374151;
-  }
-} */
-
 * {
   margin: 0;
   padding: 0;
