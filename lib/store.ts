@@ -99,12 +99,13 @@ export const useWishlistStore = create<WishlistStore>()(
   )
 );
 
+// Note: Auth is now handled by Clerk
+// This store is kept for backward compatibility but should use Clerk hooks instead
 interface AuthStore {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
-  register: (email: string, password: string, name: string) => Promise<boolean>;
+  setUser: (user: User | null) => void;
+  setAuthenticated: (isAuthenticated: boolean) => void;
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -112,47 +113,8 @@ export const useAuthStore = create<AuthStore>()(
     (set) => ({
       user: null,
       isAuthenticated: false,
-      login: async (email, password) => {
-        // Dummy authentication
-        if (email === "admin@bicycleshop.com" && password === "admin123") {
-          set({
-            user: {
-              id: "admin-1",
-              email: "admin@bicycleshop.com",
-              name: "Admin User",
-              role: "admin",
-            },
-            isAuthenticated: true,
-          });
-          return true;
-        } else if (email === "user@example.com" && password === "user123") {
-          set({
-            user: {
-              id: "user-1",
-              email: "user@example.com",
-              name: "John Doe",
-              role: "customer",
-            },
-            isAuthenticated: true,
-          });
-          return true;
-        }
-        return false;
-      },
-      logout: () => set({ user: null, isAuthenticated: false }),
-      register: async (email, password, name) => {
-        // Dummy registration
-        set({
-          user: {
-            id: `user-${Date.now()}`,
-            email,
-            name,
-            role: "customer",
-          },
-          isAuthenticated: true,
-        });
-        return true;
-      },
+      setUser: (user) => set({ user }),
+      setAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
     }),
     {
       name: "auth-storage",

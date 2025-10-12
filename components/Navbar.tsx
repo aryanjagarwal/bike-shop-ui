@@ -12,13 +12,16 @@ import {
   Heart,
   LogOut,
 } from "lucide-react";
-import { useCartStore, useAuthStore, useUIStore } from "@/lib/store";
+import { useCartStore, useUIStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { useUser, useClerk } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const { getItemCount } = useCartStore();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isSignedIn } = useUser();
+  const { signOut } = useClerk();
   const { isMobileMenuOpen, toggleMobileMenu, toggleCart, toggleSearch } =
     useUIStore();
 
@@ -117,16 +120,28 @@ export default function Navbar() {
             </motion.button>
 
             {/* User Menu */}
-            {isAuthenticated ? (
+            {isSignedIn ? (
               <div className="relative group">
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
-                  <User className="w-5 h-5 text-gray-700" />
+                  {user?.imageUrl ? (
+                    <img 
+                      src={user.imageUrl} 
+                      alt={user.fullName || "User"} 
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-5 h-5 text-gray-700" />
+                  )}
                 </motion.button>
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <p className="font-semibold text-sm text-gray-900">{user?.fullName || "User"}</p>
+                    <p className="text-xs text-gray-500 truncate">{user?.primaryEmailAddress?.emailAddress}</p>
+                  </div>
                   <Link
                     href="/account"
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
@@ -139,7 +154,7 @@ export default function Navbar() {
                   >
                     Orders
                   </Link>
-                  {user?.role === "admin" && (
+                  {user?.publicMetadata?.role === "admin" && (
                     <Link
                       href="/admin"
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
@@ -148,8 +163,8 @@ export default function Navbar() {
                     </Link>
                   )}
                   <button
-                    onClick={logout}
-                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                    onClick={() => signOut()}
+                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center space-x-2 border-t border-gray-100"
                   >
                     <LogOut className="w-4 h-4" />
                     <span>Logout</span>
