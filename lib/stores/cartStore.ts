@@ -38,8 +38,47 @@ export const useCartStore = create<CartState>()(
       isLoading: false,
       error: null,
 
-      // Set entire cart (from API)
-      setCart: (cart) => set({ cart, error: null }),
+      // Set entire cart (from API) - preserve item references where possible
+      setCart: (cart) => set((state) => {
+        // If no previous cart, just set the new one
+        if (!state.cart || !state.cart.items || !cart.items) {
+          return { cart, error: null };
+        }
+
+        // Preserve item references for items that haven't changed
+        const mergedItems = cart.items.map((newItem) => {
+          const oldItem = state.cart!.items.find((item) => item.id === newItem.id);
+          
+          // If item exists with same id and quantity, preserve the old reference entirely
+          if (oldItem && 
+              oldItem.id === newItem.id && 
+              oldItem.quantity === newItem.quantity &&
+              oldItem.bicycleId === newItem.bicycleId &&
+              oldItem.partId === newItem.partId) {
+            return oldItem;
+          }
+          
+          // Otherwise use the new item
+          return newItem;
+        });
+
+        // Check if items array actually changed
+        const itemsChanged = mergedItems.length !== state.cart.items.length ||
+          mergedItems.some((item, index) => item !== state.cart!.items[index]);
+
+        // If nothing changed, return the same cart reference
+        if (!itemsChanged) {
+          return state;
+        }
+
+        return {
+          cart: {
+            ...cart,
+            items: mergedItems,
+          },
+          error: null,
+        };
+      }),
 
       // Add item to cart (optimistic update)
       addItem: (item) =>
@@ -78,9 +117,18 @@ export const useCartStore = create<CartState>()(
         set((state) => {
           if (!state.cart || !state.cart.items) return state;
 
-          const updatedItems = state.cart.items?.map((item) =>
-            item.id === itemId ? { ...item, quantity } : item
-          );
+          // Only update if quantity actually changed
+          const updatedItems = state.cart.items?.map((item) => {
+            if (item.id === itemId) {
+              // If quantity is the same, return the same reference
+              if (item.quantity === quantity) {
+                return item;
+              }
+              // Only create new object if quantity changed
+              return { ...item, quantity };
+            }
+            return item;
+          });
 
           return {
             cart: {
@@ -174,4 +222,14 @@ export const selectIsItemInCart = (bicycleId?: string, partId?: string) => (stat
       (bicycleId && item.bicycleId === bicycleId) ||
       (partId && item.partId === partId)
   );
+};
+
+// Selector to get a specific cart item by bicycle or part ID
+export const selectCartItemByProductId = (bicycleId?: string, partId?: string) => (state: CartState) => {
+  if (!state.cart || !state.cart.items) return null;
+  return state.cart.items.find(
+    (item) =>
+      (bicycleId && item.bicycleId === bicycleId) ||
+      (partId && item.partId === partId)
+  ) || null;
 };

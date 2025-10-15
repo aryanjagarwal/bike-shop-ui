@@ -77,81 +77,119 @@ export const useCart = () => {
    */
   const add = async (data: AddToCartRequest) => {
     try {
-      setLoading(true);
+      // Call backend to add item (no optimistic update as we need full item details)
       const result = await addMutation.mutateAsync(data);
       if (result.data) {
         setCart(result.data);
       }
-      setLoading(false);
       return { success: true, data: result.data };
     } catch (error) {
-      setLoading(false);
       setError(error instanceof Error ? error.message : 'Failed to add to cart');
       return { success: false, error };
     }
   };
 
   /**
-   * Update cart item quantity
+   * Update cart item quantity - Optimistic update pattern
    */
   const updateQuantity = async (itemId: string, quantity: number) => {
+    // Save current state before optimistic update
+    const previousCart = cart;
+    
+    // Step 1: Optimistically update UI immediately
+    updateItemInStore(itemId, quantity);
+    
     try {
-      setLoading(true);
-      // Optimistic update
-      updateItemInStore(itemId, quantity);
-      
+      // Step 2: Update backend
       const result = await updateMutation.mutateAsync({ itemId, quantity });
-      if (result.data) {
+      
+      // Step 3: Sync with backend response
+      // Use the previous cart state as baseline for merging to preserve references better
+      if (result.data && previousCart) {
+        // Manually merge: preserve items that haven't changed from previousCart
+        const mergedItems = result.data.items.map((newItem) => {
+          const prevItem = previousCart.items?.find(item => item.id === newItem.id);
+          // If item exists in previous state with same quantity, keep that reference
+          if (prevItem && prevItem.quantity === newItem.quantity) {
+            return prevItem;
+          }
+          return newItem;
+        });
+        
+        setCart({
+          ...result.data,
+          items: mergedItems,
+        });
+      } else if (result.data) {
         setCart(result.data);
       }
-      setLoading(false);
       return { success: true, data: result.data };
     } catch (error) {
-      setLoading(false);
+      // Step 4: Revert optimistic update on error by refetching from backend
       setError(error instanceof Error ? error.message : 'Failed to update cart');
-      // Refetch to revert optimistic update
       await refetch();
       return { success: false, error };
     }
   };
 
   /**
-   * Remove item from cart
+   * Remove item from cart - Optimistic update pattern
    */
   const remove = async (itemId: string) => {
+    // Save current state before optimistic update
+    const previousCart = cart;
+    
+    // Step 1: Optimistically remove from UI immediately
+    removeItemFromStore(itemId);
+    
     try {
-      setLoading(true);
-      // Optimistic update
-      removeItemFromStore(itemId);
-      
+      // Step 2: Remove from backend
       const result = await removeMutation.mutateAsync(itemId);
-      if (result.data) {
+      
+      // Step 3: Sync with backend response
+      // Use the previous cart state as baseline for merging to preserve references better
+      if (result.data && previousCart) {
+        // Manually merge: preserve items that haven't changed from previousCart
+        const mergedItems = result.data.items.map((newItem) => {
+          const prevItem = previousCart.items?.find(item => item.id === newItem.id);
+          // If item exists in previous state with same quantity, keep that reference
+          if (prevItem && prevItem.quantity === newItem.quantity) {
+            return prevItem;
+          }
+          return newItem;
+        });
+        
+        setCart({
+          ...result.data,
+          items: mergedItems,
+        });
+      } else if (result.data) {
         setCart(result.data);
       }
-      setLoading(false);
       return { success: true, data: result.data };
     } catch (error) {
-      setLoading(false);
+      // Step 4: Revert optimistic update on error by refetching from backend
       setError(error instanceof Error ? error.message : 'Failed to remove from cart');
-      // Refetch to revert optimistic update
       await refetch();
       return { success: false, error };
     }
   };
 
   /**
-   * Clear entire cart
+   * Clear entire cart - Optimistic update pattern
    */
   const clear = async () => {
+    // Step 1: Optimistically clear UI immediately
+    clearCartInStore();
+    
     try {
-      setLoading(true);
+      // Step 2: Clear backend cart
       await clearMutation.mutateAsync();
-      clearCartInStore();
-      setLoading(false);
       return { success: true };
     } catch (error) {
-      setLoading(false);
+      // Step 3: Revert optimistic update on error by refetching from backend
       setError(error instanceof Error ? error.message : 'Failed to clear cart');
+      await refetch();
       return { success: false, error };
     }
   };

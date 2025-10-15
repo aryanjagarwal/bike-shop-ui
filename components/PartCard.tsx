@@ -1,11 +1,13 @@
 "use client";
 
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { ShoppingCart, Heart, Plus, Minus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useWishlist } from "@/lib/hooks/useWishlist";
 import { useCart } from "@/lib/hooks/useCart";
+import { useCartStore } from "@/lib/stores/cartStore";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import type { Part, PartImage } from "@/lib/types/allTypes";
@@ -18,7 +20,31 @@ export default function PartCard({ part }: PartCardProps) {
   const { isSignedIn } = useAuth();
   const router = useRouter();
   const { toggle, isInWishlist, isAdding: isAddingToWishlist, isRemoving } = useWishlist();
-  const { addPart, isAdding: isAddingToCart, items, updateQuantity, isUpdating, isItemInCart } = useCart();
+  const { addPart, isAdding: isAddingToCart, updateQuantity, isUpdating } = useCart();
+  
+  // Use selector with custom equality to subscribe only to this specific cart item
+  const cartItem = useCartStore(
+    useMemo(
+      () => (state) => {
+        if (!state.cart?.items) return null;
+        const item = state.cart.items.find(item => item.partId === part.id);
+        if (!item) return null;
+        // Return only the properties we care about to minimize re-renders
+        return {
+          id: item.id,
+          quantity: item.quantity,
+          partId: item.partId,
+        };
+      },
+      [part.id]
+    ),
+    (a, b) => {
+      // Custom equality: only re-render if quantity or existence changes
+      if (a === null && b === null) return true;
+      if (a === null || b === null) return false;
+      return a.id === b.id && a.quantity === b.quantity;
+    }
+  );
   
   const primaryImage = part.images?.find((img: PartImage) => img.isPrimary) || part.images?.[0];
   const imageUrl = primaryImage?.cloudinaryUrl || '/placeholder-part.jpg';
@@ -28,8 +54,7 @@ export default function PartCard({ part }: PartCardProps) {
   const isWishlistLoading = isAddingToWishlist || isRemoving;
   
   // Check if item is in cart and get its details
-  const isInCart = isItemInCart(undefined, part.id);
-  const cartItem = items.find(item => item.partId === part.id);
+  const isInCart = cartItem !== null;
   const currentQuantity = cartItem?.quantity || 0;
 
   const handleWishlistClick = async (e: React.MouseEvent) => {
