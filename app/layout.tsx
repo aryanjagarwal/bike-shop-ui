@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import Cart from "@/components/Cart";
 import SearchModal from "@/components/SearchModal";
 import ClerkSync from "@/components/ClerkSync";
+import QueryProvider from "@/lib/providers/QueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,18 +38,19 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <ClerkSync />
-          <Navbar />
-          <Cart />
-          <SearchModal />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
-        </body>
-      </html>
+      <QueryProvider>
+        <html lang="en">
+          <body
+            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          >
+            <ClerkSync />
+            <Navbar />
+            <SearchModal />
+            <main className="min-h-screen">{children}</main>
+            <Footer />
+          </body>
+        </html>
+      </QueryProvider>
     </ClerkProvider>
   );
 }

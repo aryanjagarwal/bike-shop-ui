@@ -205,7 +205,7 @@ export default function ProductDetailPage() {
               <div className="border-t pt-6 space-y-3">
                 <div className="flex items-center gap-3 text-gray-600">
                   <Truck className="w-5 h-5" />
-                  <span>Free shipping on orders over $500</span>
+                  <span>Free shipping on orders over £500</span>
                 </div>
                 <div className="flex items-center gap-3 text-gray-600">
                   <Shield className="w-5 h-5" />

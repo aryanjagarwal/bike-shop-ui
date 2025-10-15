@@ -12,26 +12,66 @@ import {
   Heart,
   LogOut,
 } from "lucide-react";
-import { useCartStore, useUIStore } from "@/lib/store";
+import { useUIStore } from "@/lib/store";
+import { useCart } from "@/lib/hooks/useCart";
 import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/nextjs";
-import { UserButton } from "@clerk/nextjs";
+import { useLogout } from "@/lib/api/auth";
+import Cart from "./Cart";
+import { redirect } from "next/navigation";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
-  const { getItemCount } = useCartStore();
+  const [visible, setVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  
+  const { count } = useCart();
   const { user, isSignedIn } = useUser();
   const { signOut } = useClerk();
-  const { isMobileMenuOpen, toggleMobileMenu, toggleCart, toggleSearch } =
-    useUIStore();
+  const logout = useLogout();
+  const { isMobileMenuOpen, toggleMobileMenu, toggleSearch } = useUIStore();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleLogout = async () => {
+    // First logout from backend (revoke token)
+    logout.mutate(undefined, {
+      onSettled: async () => {
+        // Then sign out from Clerk regardless of backend result
+        await signOut();
+      }
+    });
+  };
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      const currentScrollY = window.scrollY;
+      
+      // Update scrolled state for styling
+      setScrolled(currentScrollY > 20);
+      
+      // Show/hide navbar based on scroll direction
+      if (currentScrollY < 20) {
+        // Always show at top
+        setVisible(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down & past threshold - hide
+        setVisible(false);
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up - show
+        setVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
     };
-    window.addEventListener("scroll", handleScroll);
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [lastScrollY]);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -48,7 +88,8 @@ export default function Navbar() {
       scrolled
         ? "bg-white/80 backdrop-blur-lg shadow-lg border border-gray-200/20"
         : "bg-white/60 backdrop-blur-md",
-      isMobileMenuOpen ? "rounded-2xl" : "rounded-full"
+      isMobileMenuOpen ? "rounded-2xl" : "rounded-full",
+      visible ? "translate-y-0 opacity-100" : "-translate-y-24 opacity-0"
     )}>
       <div className="flex items-center justify-between">
         {/* Logo */}
@@ -108,13 +149,13 @@ export default function Navbar() {
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              onClick={toggleCart}
+              onClick={() => redirect("/cart")}
               className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
               <ShoppingCart className="w-5 h-5 text-gray-700" />
-              {getItemCount() > 0 && (
+              {mounted && isSignedIn && count > 0 && (
                 <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {getItemCount()}
+                  {count}
                 </span>
               )}
             </motion.button>
@@ -163,7 +204,7 @@ export default function Navbar() {
                     </Link>
                   )}
                   <button
-                    onClick={() => signOut()}
+                    onClick={handleLogout}
                     className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center space-x-2 border-t border-gray-100"
                   >
                     <LogOut className="w-4 h-4" />
@@ -216,6 +257,9 @@ export default function Navbar() {
           </div>
         </div>
       )}
+
+      {/* Mini Cart */}
+      <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </nav>
   );
 }

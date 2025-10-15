@@ -83,6 +83,12 @@ export default function AccountPage() {
                 Orders
               </button>
               <button
+                onClick={() => router.push("/addresses")}
+                className="w-full text-left px-4 py-2 hover:bg-gray-50 rounded-lg"
+              >
+                Addresses
+              </button>
+              <button
                 onClick={() => router.push("/wishlist")}
                 className="w-full text-left px-4 py-2 hover:bg-gray-50 rounded-lg"
               >

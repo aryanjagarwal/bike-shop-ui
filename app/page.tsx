@@ -6,29 +6,72 @@ import Link from "next/link";
 import Image from "next/image";
 import { products } from "@/lib/data";
 import ProductCard from "@/components/ProductCard";
+import BicycleCard from "@/components/BicycleCard";
+import { useFeaturedBicycles } from "@/lib/api/bicycles";
 import { useState, useEffect } from "react";
 
 export default function Home() {
   const featuredProducts = products.filter((p) => p.featured);
+  const { data: featuredBicyclesData, isLoading: bicyclesLoading } = useFeaturedBicycles(8);
   
-  // Hero carousel images
-  const heroImages = [
-    "https://images.unsplash.com/photo-1571333250630-f0230c320b6d?w=1920&h=1080&fit=crop",
-    "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=1920&h=1080&fit=crop",
-    "https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=1920&h=1080&fit=crop",
-    "https://images.unsplash.com/photo-1511994298241-608e28f14fde?w=1920&h=1080&fit=crop",
-    "https://images.unsplash.com/photo-1559348349-86f1f65817fe?w=1920&h=1080&fit=crop"
-  ];
+  // Hero carousel data
+  const heroTitlesSubTitlesAndImages = [
+    {
+      title: "Ride Your Dream",
+      subtitle: "Discover premium bicycles and parts for every adventure. Quality, performance, and style combined.",
+      image: "/hero-images/im1.jpg"
+    },
+    {
+      title: "Adventure Awaits",
+      subtitle: "Explore the world on two wheels. From mountain trails to city streets, find your perfect ride.",
+      image: "/hero-images/im2.jpg"
+    },
+    {
+      title: "Performance Meets Style",
+      subtitle: "Experience cutting-edge engineering and stunning design. Built for riders who demand excellence.",
+      image: "/hero-images/im3.jpg"
+    },
+    {
+      title: "Unleash Your Potential",
+      subtitle: "Push your limits with bikes designed for speed, endurance, and ultimate performance.",
+      image: "/hero-images/im4.jpg"
+    },
+    {
+      title: "Every Journey Starts Here",
+      subtitle: "Whether commuting or conquering trails, we have the perfect bicycle for your lifestyle.",
+      image: "/hero-images/im5.jpg"
+    },
+    {
+      title: "Built for Champions",
+      subtitle: "Professional-grade bicycles and components trusted by athletes worldwide.",
+      image: "/hero-images/im6.jpg"
+    },
+    {
+      title: "Ride with Confidence",
+      subtitle: "Premium quality, expert service, and comprehensive warranties on every purchase.",
+      image: "/hero-images/im7.jpg"
+    },
+    {
+      title: "Transform Your Commute",
+      subtitle: "Eco-friendly, efficient, and stylish. Make every ride an experience to remember.",
+      image: "/hero-images/im8.jpg"
+    },
+    {
+      title: "Join the Revolution",
+      subtitle: "Embrace the cycling lifestyle with our curated collection of bikes and accessories.",
+      image: "/hero-images/im9.jpg"
+    }
+  ]
   
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroTitlesSubTitlesAndImages.length);
     }, 3000);
     
     return () => clearInterval(interval);
-  }, [heroImages.length]);
+  }, [heroTitlesSubTitlesAndImages.length]);
 
   return (
     <div className="pt-0">
@@ -45,8 +88,8 @@ export default function Home() {
               className="absolute inset-0"
             >
               <Image
-                src={heroImages[currentImageIndex]}
-                alt={`Hero ${currentImageIndex + 1}`}
+                src={heroTitlesSubTitlesAndImages[currentImageIndex].image}
+                alt={heroTitlesSubTitlesAndImages[currentImageIndex].title}
                 fill
                 className="object-cover"
                 priority={currentImageIndex === 0}
@@ -64,20 +107,22 @@ export default function Home() {
             className="max-w-2xl text-white"
           >
             <motion.h1
+              key={`title-${currentImageIndex}`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.8 }}
               className="text-5xl md:text-7xl font-bold mb-6"
             >
-              Ride Your Dream
+              {heroTitlesSubTitlesAndImages[currentImageIndex].title}
             </motion.h1>
             <motion.p
+              key={`subtitle-${currentImageIndex}`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.8 }}
               className="text-xl md:text-2xl mb-8 text-gray-200"
             >
-              Discover premium bicycles and parts for every adventure. Quality, performance, and style combined.
+              {heroTitlesSubTitlesAndImages[currentImageIndex].subtitle}
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -201,7 +246,7 @@ export default function Home() {
                   <div>
                     <h3 className="font-bold text-xl mb-2">Free Shipping</h3>
                     <p className="text-gray-600">
-                      Enjoy free delivery on all orders over $500. Fast and reliable shipping to your doorstep nationwide.
+                      Enjoy free delivery on all orders over £500. Fast and reliable shipping to your doorstep nationwide.
                     </p>
                   </div>
                 </motion.div>
@@ -266,7 +311,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Products */}
+      {/* Featured Bicycles */}
       <section className="py-20 bg-white relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100 rounded-full filter blur-3xl opacity-20 -z-10" />
@@ -286,29 +331,52 @@ export default function Home() {
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full font-semibold mb-4"
             >
               <Star className="w-4 h-4 fill-blue-600" />
-              <span>Bestsellers</span>
+              <span>Featured Collection</span>
             </motion.div>
             <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-              Featured Products
+              Premium Bicycles
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Handpicked selection of our best bicycles and parts, trusted by thousands of riders
+              Handpicked selection of our best bicycles, trusted by thousands of riders
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {featuredProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <ProductCard product={product} />
-              </motion.div>
-            ))}
-          </div>
+          {/* Loading State */}
+          {bicyclesLoading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              {[...Array(8)].map((_, index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="bg-gray-200 h-64 rounded-2xl mb-4"></div>
+                  <div className="bg-gray-200 h-4 rounded mb-2"></div>
+                  <div className="bg-gray-200 h-4 rounded w-2/3"></div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Bicycles Grid */}
+          {!bicyclesLoading && featuredBicyclesData?.data && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              {featuredBicyclesData.data.map((bicycle, index) => (
+                <motion.div
+                  key={bicycle.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <BicycleCard bicycle={bicycle} />
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!bicyclesLoading && (!featuredBicyclesData?.data || featuredBicyclesData.data.length === 0) && (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No featured bicycles available at the moment.</p>
+            </div>
+          )}
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -322,7 +390,7 @@ export default function Home() {
                 whileTap={{ scale: 0.95 }}
                 className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto"
               >
-                View All Products
+                View All Bicycles
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </motion.button>
             </Link>
