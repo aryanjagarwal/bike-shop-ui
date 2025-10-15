@@ -1,5 +1,5 @@
 // Orders API - TanStack Query hooks for order management
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient, ApiResponse } from './client';
 import type { Order, OrderItem, OrderStatus, PaymentStatus, Address, User } from '@/lib/types/allTypes';
 import type { Bicycle, BicycleImage } from '@/lib/types/allTypes';
@@ -156,6 +156,49 @@ export interface ConfirmStripeOrderResponse {
   data: OrderWithDetails;
 }
 
+// Get My Orders Request
+export interface GetMyOrdersRequest {
+  status?: OrderStatus;
+  startDate?: string; // ISO date string
+  endDate?: string; // ISO date string
+  page?: number;
+  limit?: number;
+  sortBy?: 'createdAt' | 'totalAmount' | 'orderNumber';
+  sortOrder?: 'asc' | 'desc';
+}
+
+// Get My Orders Response
+export interface GetMyOrdersResponse {
+  success: boolean;
+  data: OrderWithDetails[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
+// Get Order by ID Response
+export interface GetOrderByIdResponse {
+  success: boolean;
+  data: OrderWithDetails;
+}
+
+// Cancel Order Request
+export interface CancelOrderRequest {
+  reason?: string;
+}
+
+// Cancel Order Response
+export interface CancelOrderResponse {
+  success: boolean;
+  message: string;
+  data: Order;
+}
+
 // ============================================
 // API Functions
 // ============================================
@@ -190,6 +233,48 @@ export const confirmStripeOrder = async (
   return apiClient.post<ConfirmStripeOrderResponse>(
     '/api/orders/confirm-stripe',
     request
+  );
+};
+
+/**
+ * Get my orders with filters
+ */
+export const getMyOrders = async (
+  params?: GetMyOrdersRequest
+): Promise<GetMyOrdersResponse> => {
+  const queryParams = new URLSearchParams();
+  
+  if (params?.status) queryParams.append('status', params.status);
+  if (params?.startDate) queryParams.append('startDate', params.startDate);
+  if (params?.endDate) queryParams.append('endDate', params.endDate);
+  if (params?.page) queryParams.append('page', params.page.toString());
+  if (params?.limit) queryParams.append('limit', params.limit.toString());
+  if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+  if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+  
+  const queryString = queryParams.toString();
+  const endpoint = queryString ? `/api/orders/me?${queryString}` : '/api/orders/me';
+  
+  return apiClient.get<GetMyOrdersResponse>(endpoint);
+};
+
+/**
+ * Get order by ID
+ */
+export const getOrderById = async (orderId: string): Promise<GetOrderByIdResponse> => {
+  return apiClient.get<GetOrderByIdResponse>(`/api/orders/${orderId}`);
+};
+
+/**
+ * Cancel an order
+ */
+export const cancelOrder = async (
+  orderId: string,
+  request?: CancelOrderRequest
+): Promise<CancelOrderResponse> => {
+  return apiClient.post<CancelOrderResponse>(
+    `/api/orders/${orderId}/cancel`,
+    request || {}
   );
 };
 
@@ -247,6 +332,72 @@ export const useConfirmStripeOrder = () => {
     },
     onError: (error: any) => {
       console.error('Failed to confirm Stripe order:', error);
+    },
+  });
+};
+
+/**
+ * Hook to get my orders with filters
+ * @param params - Filter parameters for orders
+ * @param options - React Query options
+ */
+export const useMyOrders = (
+  params?: GetMyOrdersRequest,
+  options?: {
+    enabled?: boolean;
+    refetchInterval?: number;
+    staleTime?: number;
+  }
+) => {
+  return useQuery({
+    queryKey: ['orders', 'me', params],
+    queryFn: () => getMyOrders(params),
+    enabled: options?.enabled ?? true,
+    refetchInterval: options?.refetchInterval,
+    staleTime: options?.staleTime ?? 1000 * 60 * 5, // 5 minutes default
+  });
+};
+
+/**
+ * Hook to get order by ID
+ * @param orderId - The order ID
+ * @param options - React Query options
+ */
+export const useOrderById = (
+  orderId: string,
+  options?: {
+    enabled?: boolean;
+    refetchInterval?: number;
+    staleTime?: number;
+  }
+) => {
+  return useQuery({
+    queryKey: ['orders', orderId],
+    queryFn: () => getOrderById(orderId),
+    enabled: (options?.enabled ?? true) && !!orderId,
+    refetchInterval: options?.refetchInterval,
+    staleTime: options?.staleTime ?? 1000 * 60 * 5, // 5 minutes default
+  });
+};
+
+/**
+ * Hook to cancel an order
+ */
+export const useCancelOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ orderId, request }: { orderId: string; request?: CancelOrderRequest }) =>
+      cancelOrder(orderId, request),
+    onSuccess: (data, variables) => {
+      // Invalidate the specific order query
+      queryClient.invalidateQueries({ queryKey: ['orders', variables.orderId] });
+      
+      // Invalidate the orders list
+      queryClient.invalidateQueries({ queryKey: ['orders', 'me'] });
+    },
+    onError: (error: any) => {
+      console.error('Failed to cancel order:', error);
     },
   });
 };
