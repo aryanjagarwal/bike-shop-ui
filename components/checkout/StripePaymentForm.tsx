@@ -63,11 +63,11 @@ const PaymentForm = ({
 
   // Block browser navigation during payment
   useEffect(() => {
-    if (isProcessing) {
+    if (isProcessing && typeof window !== 'undefined') {
       window.addEventListener("beforeunload", handleBeforeUnload);
 
       const handlePopState = (e: PopStateEvent) => {
-        if (isProcessing) {
+        if (isProcessing && typeof window !== 'undefined') {
           window.history.pushState(null, "", window.location.href);
           alert("Please wait while your payment is being processed.");
         }
