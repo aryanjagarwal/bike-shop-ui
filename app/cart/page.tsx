@@ -31,6 +31,7 @@ export default function CartPage() {
   // Coupon state
   const [showCoupons, setShowCoupons] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
+  const [applyingCouponId, setApplyingCouponId] = useState<string | null>(null);
   const [appliedCoupon, setAppliedCoupon] = useState<{
     couponId: string;
     couponCode: string;
@@ -450,6 +451,7 @@ export default function CartPage() {
                                   <button
                                     onClick={() => {
                                       if (isEligible) {
+                                        setApplyingCouponId(coupon.id);
                                         applyCouponMutation.mutate(
                                           {
                                             couponId: coupon.id,
@@ -459,18 +461,20 @@ export default function CartPage() {
                                             onSuccess: (data) => {
                                               setAppliedCoupon(data.data);
                                               setShowCoupons(false);
+                                              setApplyingCouponId(null);
                                             },
                                             onError: (error) => {
                                               console.error('Failed to apply coupon:', error);
+                                              setApplyingCouponId(null);
                                             },
                                           }
                                         );
                                       }
                                     }}
-                                    disabled={!isEligible || applyCouponMutation.isPending}
+                                    disabled={!isEligible || (applyCouponMutation.isPending && applyingCouponId === coupon.id)}
                                     className="px-3 py-1 text-xs font-semibold bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
-                                    {applyCouponMutation.isPending ? 'Applying...' : 'Apply'}
+                                    {applyingCouponId === coupon.id && applyCouponMutation.isPending ? 'Applying...' : 'Apply'}
                                   </button>
                                 </div>
                               </div>

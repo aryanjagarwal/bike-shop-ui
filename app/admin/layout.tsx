@@ -10,6 +10,8 @@ import {
   ShoppingCart,
   Package,
   BarChart3,
+  Users,
+  Wrench,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -69,10 +71,21 @@ export default function AdminLayout({
       icon: ShoppingCart,
     },
     {
-      name: "Analytics",
-      href: "/admin/analytics",
-      icon: BarChart3,
+      name: "Users",
+      href: "/admin/users",
+      icon: Users,
     },
+    {
+      name: "Services",
+      href: "/admin/services",
+      icon: Wrench,
+    },
+
+    //{
+    //  name: "Analytics",
+    //  href: "/admin/analytics",
+    //  icon: BarChart3,
+    //},
   ];
 
   return (

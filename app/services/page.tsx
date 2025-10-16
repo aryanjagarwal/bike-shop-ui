@@ -1,60 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Wrench, Settings, Package, Users, Clock, Award } from "lucide-react";
+import { Clock, Award, Package, Loader2, AlertCircle } from "lucide-react";
 import Image from "next/image";
+import { useServiceCategories } from "@/lib/api/serviceBookings";
+import ServiceCategoryCard from "@/components/services/ServiceCategoryCard";
+import Link from "next/link";
 
 export default function ServicesPage() {
-  const services = [
-    {
-      icon: Wrench,
-      title: "Bike Repair & Maintenance",
-      description:
-        "Expert repair services for all types of bicycles. From basic tune-ups to complete overhauls.",
-      features: [
-        "Brake adjustments",
-        "Gear tuning",
-        "Wheel truing",
-        "Chain replacement",
-      ],
-    },
-    {
-      icon: Settings,
-      title: "Custom Bike Building",
-      description:
-        "Build your dream bike from scratch with our expert guidance and premium components.",
-      features: [
-        "Frame selection",
-        "Component consultation",
-        "Professional assembly",
-        "Test ride & adjustments",
-      ],
-    },
-    {
-      icon: Package,
-      title: "Bike Fitting",
-      description:
-        "Professional bike fitting service to ensure optimal comfort and performance.",
-      features: [
-        "Body measurements",
-        "Saddle positioning",
-        "Handlebar adjustment",
-        "Pedal alignment",
-      ],
-    },
-    {
-      icon: Users,
-      title: "Group Rides & Events",
-      description:
-        "Join our community rides and cycling events. All skill levels welcome!",
-      features: [
-        "Weekly group rides",
-        "Cycling workshops",
-        "Racing events",
-        "Social gatherings",
-      ],
-    },
-  ];
+  const { data: categoriesResponse, isLoading, error } = useServiceCategories();
 
   return (
     <div className="pt-24 pb-12 bg-gray-50 min-h-screen">
@@ -81,38 +35,54 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Services Grid */}
+      {/* Service Categories */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {services.map((service, index) => (
-            <motion.div
-              key={service.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-lg shadow-sm p-8"
-            >
-              <div className="flex items-start gap-4 mb-4">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <service.icon className="w-8 h-8 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold mb-2">{service.title}</h3>
-                  <p className="text-gray-600">{service.description}</p>
-                </div>
-              </div>
-              <ul className="space-y-2 ml-16">
-                {service.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2 text-gray-700">
-                    <span className="w-2 h-2 bg-blue-600 rounded-full" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-3xl font-bold mb-4">Our Service Categories</h2>
+          <p className="text-gray-600 text-lg">
+            Browse our professional bicycle services and book an appointment
+          </p>
+        </motion.div>
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Failed to load services</h3>
+            <p className="text-gray-600">Please try again later</p>
+          </div>
+        )}
+
+        {/* Categories Grid */}
+        {categoriesResponse?.data && categoriesResponse.data.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categoriesResponse.data.map((category, index) => (
+              <ServiceCategoryCard
+                key={category.id}
+                category={category}
+                index={index}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {categoriesResponse?.data && categoriesResponse.data.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-600">No services available at the moment</p>
+          </div>
+        )}
       </section>
 
       {/* Why Choose Us */}
@@ -194,20 +164,24 @@ export default function ServicesPage() {
             Book your service appointment today or visit our shop
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-            >
-              Book Appointment
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-3 bg-transparent border-2 border-white text-white rounded-lg font-semibold hover:bg-white/10 transition-colors"
-            >
-              Contact Us
-            </motion.button>
+            <Link href="/account/bookings">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+              >
+                View My Bookings
+              </motion.button>
+            </Link>
+            <Link href="/contact">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-3 bg-transparent border-2 border-white text-white rounded-lg font-semibold hover:bg-white/10 transition-colors"
+              >
+                Contact Us
+              </motion.button>
+            </Link>
           </div>
         </motion.div>
       </section>
