@@ -9,6 +9,14 @@ import {
   useUpdatePartCategory,
   useDeletePartCategory,
 } from "@/lib/api/admin/parts";
+import type { PartCategory } from "@/lib/types/allTypes";
+
+// Extended type to include Prisma's _count field
+type PartCategoryWithCount = PartCategory & {
+  _count?: {
+    parts?: number;
+  };
+};
 
 export default function ManagePartCategoriesPage() {
   const { data, isLoading } = useAdminPartCategories();
@@ -16,10 +24,10 @@ export default function ManagePartCategoriesPage() {
   const updateCategory = useUpdatePartCategory();
   const deleteCategory = useDeletePartCategory();
 
-  const categories = data?.data || [];
+  const categories = (data?.data || []) as PartCategoryWithCount[];
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [editingCategory, setEditingCategory] = useState<PartCategoryWithCount | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
@@ -40,7 +48,7 @@ export default function ManagePartCategoriesPage() {
     setShowCreateModal(true);
   };
 
-  const handleEdit = (category: any) => {
+  const handleEdit = (category: PartCategoryWithCount) => {
     setFormData({
       name: category.name,
       slug: category.slug,
